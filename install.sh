@@ -1,9 +1,10 @@
 #!/bin/bash
 
 echo "STEP [1/4]"
+cd application && npm install
 
 echo "STEP [2/4]"
-cd application && npm run build
+npm run build
 
 echo "STEP [3/4]"
 docker-compose build
