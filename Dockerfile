@@ -29,5 +29,3 @@ COPY application/package.json .
 RUN npm install
 
 CMD [ "node", "/app/main.js" ]
-
-EXPOSE 5000
