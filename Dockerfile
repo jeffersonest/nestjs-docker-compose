@@ -1,26 +1,33 @@
-FROM node:18
+FROM ubuntu:latest
+ENV NODE_VERSION=16.13.0
 
-ARG uid=1001
-ARG user=jeff
-ARG appname=nestapp
+WORKDIR /app
 
-# Clear cache
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+COPY application/dist .
+COPY application/package-lock.json .
+COPY application/package.json .
 
-# Create system user to run Composer and Artisan Commands
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/$appname && chown -R $user:$user /home/$user
+RUN apt-get update
 
-WORKDIR /home/$user/$appname
+RUN apt install -y curl
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
 
-COPY ./application/* .
+ENV NVM_DIR=/root/.nvm
+
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+
+WORKDIR /app
+
+COPY application/dist .
+COPY application/package-lock.json .
+COPY application/package.json .
 
 RUN npm install
 
-# Creates a "dist" folder with the production build
-RUN npm run build
+CMD [ "node", "/app/main.js" ]
 
-# Start the server using the production build
-CMD [ "node", "dist/main.js" ]
-
-EXPOSE 3000
+EXPOSE 5000

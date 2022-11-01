@@ -1,0 +1,28 @@
+version: "3.7"
+services:
+  nest:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    image: nest-app-image
+    container_name: nest-app
+#    restart: unless-stopped
+    working_dir: /home/app/
+    volumes:
+      - ./application:/home/app/
+    networks:
+      - nestwork
+  nginx:
+    image: nginx:alpine
+    container_name: nest-app-nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    volumes:
+      - ./application:/var/www/html
+      - ./nginx:/etc/nginx/conf.d/
+    networks:
+      - nestwork
+networks:
+  nestwork:
+    driver: bridge
